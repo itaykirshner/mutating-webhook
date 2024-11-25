@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wfr-kfp-mutating-webhook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wfr-kfp-mutating-webhook
+  template:
+    metadata:
+      labels:
+        app: wfr-kfp-mutating-webhook
+    spec:
+      containers:
+      - name: wfr-kfp-mutating-webhook
+        image: gcr.io/iguazio/wfr-kfp-mutating-webhook:v1
+        ports:
+        - containerPort: 5000
+        env:
+        - name: NODE_POOL
+          value: "app.iguazio.com/node-group: added-wr17wzokx4"
+        volumeMounts:
+        - name: certs-volume
+          readOnly: true
+          mountPath: "/certs"
+      volumes:
+      - name: certs-volume
+        secret:
+          secretName: admission-tls
+      hostNetwork: true
