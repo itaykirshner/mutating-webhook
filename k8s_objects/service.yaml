@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wfr-kfp-mutating-webhook
+spec:
+  selector:
+    app: wfr-kfp-mutating-webhook
+  ports:
+  - port: 5000

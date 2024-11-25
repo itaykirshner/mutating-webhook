@@ -1,0 +1,24 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mwfr-kfp-mutating-webhook
+webhooks:
+- name: wfr-kfp-mutating-webhook.default.svc
+  matchPolicy: Equivalent
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  rules:
+  - operations: ["CREATE"]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods", "jobs"]
+    scope: "Namespaced"
+  failurePolicy: Ignore
+  timeoutSeconds: 20
+  clientConfig:
+    caBundle: cabundle_placeholder
+    service:
+      namespace: default
+      name: wfr-kfp-mutating-webhook
+      path: /mutate
+      port: 5000

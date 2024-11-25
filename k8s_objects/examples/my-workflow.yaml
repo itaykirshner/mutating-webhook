@@ -1,0 +1,193 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    cni.projectcalico.org/containerID: 73e93f93c1df67c3e22af23fd784090d56f9af22f671a0bdf302f810ca7698d7
+    cni.projectcalico.org/podIP: ""
+    cni.projectcalico.org/podIPs: ""
+  creationTimestamp: "2024-11-25T08:34:38Z"
+  generateName: my-workflow-
+  labels:
+    job-type: workflow-runner
+    mlrun/class: job
+    mlrun/client_python_version: 3.9.18
+    mlrun/client_version: 1.6.3
+    mlrun/function: workflow-runner-my-workflow
+    mlrun/name: my-workflow
+    mlrun/owner: pipelines
+    mlrun/project: remote-worklfow-node-selector
+    mlrun/scrape-metrics: "True"
+    mlrun/tag: latest
+    mlrun/uid: f24078b652b54e3eb51410561b2589cb
+    workflow: my_workflow
+  name: my-workflow-t7bdl
+  namespace: default-tenant
+  resourceVersion: "371879"
+  uid: 1413180a-3957-4335-a36a-88b585254033
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: app.iguazio.com/lifecycle
+            operator: NotIn
+            values:
+            - preemptible
+          - key: eks.amazonaws.com/capacityType
+            operator: NotIn
+            values:
+            - SPOT
+          - key: node-lifecycle
+            operator: NotIn
+            values:
+            - spot
+  containers:
+  - args:
+    - run
+    - --name
+    - my-workflow
+    - --from-env
+    - --handler
+    - mlrun.projects.load_and_run
+    command:
+    - mlrun
+    env:
+    - name: MLRUN_DEFAULT_PROJECT
+      value: remote-worklfow-node-selector
+    - name: MLRUN_EXEC_CONFIG
+      value: '{"spec": {"parameters": {"url": "git://github.com/amit-elbaz/remote-workflow.git#refs/heads/main",
+        "project_name": "remote-worklfow-node-selector", "workflow_name": "my_workflow",
+        "workflow_path": "my_workflow.py", "workflow_arguments": null, "artifact_path":
+        "v3io:///projects/{{run.project}}/artifacts/{{workflow.uid}}", "workflow_handler":
+        null, "namespace": null, "ttl": null, "engine": "kfp", "local": null, "save":
+        true, "dirty": true, "subpath": null, "wait_for_completion": true}, "outputs":
+        [], "output_path": "v3io:///projects/remote-worklfow-node-selector/artifacts/{{workflow.uid}}",
+        "function": "remote-worklfow-node-selector/workflow-runner-my-workflow@75696403e9a17eb90ddff22accc1cccd6ee0c049",
+        "secret_sources": [], "scrape_metrics": true, "state_thresholds": {"pending_scheduled":
+        "1h", "pending_not_scheduled": "-1", "image_pull_backoff": "1h", "executing":
+        "24h"}, "handler": "mlrun.projects.load_and_run"}, "metadata": {"uid": "f24078b652b54e3eb51410561b2589cb",
+        "name": "my-workflow", "project": "remote-worklfow-node-selector", "labels":
+        {"job-type": "workflow-runner", "workflow": "my_workflow", "kind": "job",
+        "owner": "pipelines", "mlrun/schedule-name": "my_workflow"}, "iteration":
+        0}, "status": {"state": "created"}}'
+    - name: MLRUN_DBPATH
+      value: http://mlrun-api:8080
+    - name: MLRUN_NAMESPACE
+      value: default-tenant
+    - name: MLRUN_AUTH_SESSION
+      valueFrom:
+        secretKeyRef:
+          key: accessKey
+          name: mlrun-auth-secrets.f65d96c6413e280b694b4b73908a653d41b5d1fb0a52a89e871311d6
+    - name: V3IO_API
+      value: http://v3io-webapi:8081
+    - name: V3IO_USERNAME
+      value: admin
+    - name: V3IO_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          key: accessKey
+          name: mlrun-auth-secrets.79da2b6e8951162c3eee867a9042961513b0c986ca5a37e5da5daed9
+    - name: V3IO_FRAMESD
+      value: http://framesd:8080
+    image: mlrun/mlrun:1.6.3
+    imagePullPolicy: IfNotPresent
+    name: base
+    resources:
+      limits:
+        cpu: "2"
+        memory: 20Gi
+      requests:
+        cpu: 25m
+        memory: 1Mi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-gpm2d
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: ip-172-31-0-238.us-east-2.compute.internal
+  preemptionPolicy: Never
+  priority: 200
+  priorityClassName: igz-workload-medium
+  restartPolicy: Never
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-gpm2d
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2024-11-25T08:34:38Z"
+    reason: PodCompleted
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2024-11-25T08:35:22Z"
+    reason: PodCompleted
+    status: "False"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2024-11-25T08:35:22Z"
+    reason: PodCompleted
+    status: "False"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2024-11-25T08:34:38Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://2e1d0c80725ca26cf3730daa7414c636d75e00a75c908dc6d3771b4ce4079259
+    image: docker.io/mlrun/mlrun:1.6.3
+    imageID: docker.io/mlrun/mlrun@sha256:22e8fb7380c392ff90931cb22e8f6277eaa9e0f00604a6b89a67edd16d44b22d
+    lastState: {}
+    name: base
+    ready: false
+    restartCount: 0
+    started: false
+    state:
+      terminated:
+        containerID: containerd://2e1d0c80725ca26cf3730daa7414c636d75e00a75c908dc6d3771b4ce4079259
+        exitCode: 0
+        finishedAt: "2024-11-25T08:35:22Z"
+        reason: Completed
+        startedAt: "2024-11-25T08:34:39Z"
+  hostIP: 172.31.0.238
+  phase: Succeeded
+  podIP: 192.168.169.253
+  podIPs:
+  - ip: 192.168.169.253
+  qosClass: Burstable
+  startTime: "2024-11-25T08:34:38Z"
